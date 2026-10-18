@@ -60,7 +60,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:14px}
 
 <section id="login" class="card">
 <h2>ADMIN AREA</h2>
-<label for="uid">Admin ID :</label><input id="uid" autocomplete="username">
+<label for="uid">Admin ID :</label><input id="uid" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
 <label for="pwd">Password :</label><input id="pwd" type="password" autocomplete="current-password">
 <button id="loginBtn">Login</button>
 <div class="err" id="loginErr"></div>
@@ -110,7 +110,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:14px}
 <section id="usersPage" class="card hide">
 <h2>Manage Users</h2>
 <div class="row3"><div><label>User ID</label><input id="nuId"></div><div><label>Password</label><input id="nuPwd" type="password"></div><div><label>Role</label><select id="nuRole"><option value="Staff">Staff</option><option value="Admin">Admin</option></select></div></div>
-<button id="nuBtn">Add user</button><div class="err" id="nuMsg"></div>
+<p class="sub hide" id="nuHint">Leave password blank to keep the current password.</p>
+<button id="nuBtn">Add user</button> <button id="nuCancel" class="hide" style="background:transparent;color:var(--blue);border:1px solid var(--blue)">Cancel</button><div class="err" id="nuMsg"></div>
 <div class="wrap"><table><thead><tr><th>User ID</th><th>Role</th><th>Action</th></tr></thead><tbody id="uBody"></tbody></table></div>
 </section>
 
@@ -139,7 +140,7 @@ function load(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}ca
 function save(k,v){mem[k]=v;try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 function T(h,m,sec){return new Date(2026,9,18,h,m,sec).getTime()}
 var SEED=[];
-var receipts=load("bc_receipts",SEED),customH=load("bc_hosp",[]),password=load("bc_pwd","admin123");
+var receipts=load("bc_receipts",SEED),customH=load("bc_hosp",[]),password="";
 function pad(n){return n<10?"0"+n:""+n}
 function dkey(t){var d=new Date(t);return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
 function dshow(t){var d=new Date(t);return pad(d.getDate())+"-"+pad(d.getMonth()+1)+"-"+d.getFullYear()}
@@ -148,10 +149,10 @@ function total(r){return r.bags.reduce(function(s,b){return s+Number(b.amt||0)},
 
 var pages={issue:"Issue Bags",rep1:"View Reports",rep2:"Bags Reports",rep3:"Hospital Wise",rep4:"Bag ID Reports",users:"Manage Users",pwdPage:"Change Password",backup:"Backup",out:"Logout"};
 var ids=["login","issue","receipt","rep1","rep2","pwdPage","backup","usersPage"],me=null,editing=null,mode="bags";
-function buildNav(){var n=$("nav");n.innerHTML="";Object.keys(pages).forEach(function(k){if(me&&me.role!=="Admin"&&(k==="users"||k==="backup"))return;var b=document.createElement("button");b.textContent=pages[k];b.dataset.k=k;b.onclick=function(){go(k)};n.appendChild(b)})}
+function buildNav(){var n=$("nav");n.innerHTML="";Object.keys(pages).forEach(function(k){if(me&&me.role!=="Admin"&&k!=="issue"&&k!=="pwdPage"&&k!=="out")return;var b=document.createElement("button");b.textContent=pages[k];b.dataset.k=k;b.onclick=function(){go(k)};n.appendChild(b)})}
 function go(k){
   if(k==="out"){try{sessionStorage.removeItem("bc_in");sessionStorage.removeItem("bc_user")}catch(e){}me=null;$("nav").classList.add("hide");return showSec("login")}
-  var sec=k;if(k==="users"){sec="usersPage";renderUsers()}
+  var sec=k;if(k==="users"){sec="usersPage";cancelU();renderUsers()}
   if(k==="rep3"||k==="rep4"||k==="rep2"){sec="rep2";mode=k==="rep4"?"ids":"bags";
     $("rep2h").textContent=k==="rep3"?"Hospital Wise Bags Report":(k==="rep4"?"Bag ID Report":"View Bags Report");
     $("hospBox").classList.toggle("hide",k!=="rep3");buildHead();$("r2body").innerHTML="";$("r2foot").innerHTML="";$("rep2t").textContent="";}
@@ -163,14 +164,29 @@ function go(k){
 function showSec(id){ids.forEach(function(s){$(s).classList.toggle("hide",s!==id)});window.scrollTo(0,0)}
 
 /* login */
-function H(p){return(window.crypto&&crypto.subtle)?crypto.subtle.digest("SHA-256",new TextEncoder().encode("bc:"+p)).then(function(b){return Array.prototype.map.call(new Uint8Array(b),function(x){return("0"+x.toString(16)).slice(-2)}).join("")}):Promise.resolve("p:"+p)}
+var K256=[],H256=[];(function(){var p=2;while(K256.length<64){var ok=true;for(var d=2;d*d<=p;d++)if(p%d===0){ok=false;break}if(ok){if(H256.length<8)H256.push(Math.floor((Math.sqrt(p)%1)*4294967296));K256.push(Math.floor((Math.pow(p,1/3)%1)*4294967296))}p++}})();
+function sha256js(str){var b=Array.from(new TextEncoder().encode(str)),L=b.length*8;b.push(128);while(b.length%64!==56)b.push(0);b.push(0,0,0,0,(L>>>24)&255,(L>>>16)&255,(L>>>8)&255,L&255);
+var h=H256.slice(),w=new Array(64),o,i;
+for(o=0;o<b.length;o+=64){for(i=0;i<16;i++)w[i]=((b[o+4*i]<<24)|(b[o+4*i+1]<<16)|(b[o+4*i+2]<<8)|b[o+4*i+3])>>>0;
+for(i=16;i<64;i++){var x=w[i-15],y=w[i-2],s0=((x>>>7|x<<25)^(x>>>18|x<<14)^(x>>>3))>>>0,s1=((y>>>17|y<<15)^(y>>>19|y<<13)^(y>>>10))>>>0;w[i]=(w[i-16]+s0+w[i-7]+s1)>>>0}
+var a=h[0],bb=h[1],c=h[2],d=h[3],e=h[4],f=h[5],g=h[6],hh=h[7];
+for(i=0;i<64;i++){var S1=((e>>>6|e<<26)^(e>>>11|e<<21)^(e>>>25|e<<7))>>>0,ch=((e&f)^(~e&g))>>>0,t1=(hh+S1+ch+K256[i]+w[i])>>>0,S0=((a>>>2|a<<30)^(a>>>13|a<<19)^(a>>>22|a<<10))>>>0,mj=((a&bb)^(a&c)^(bb&c))>>>0,t2=(S0+mj)>>>0;hh=g;g=f;f=e;e=(d+t1)>>>0;d=c;c=bb;bb=a;a=(t1+t2)>>>0}
+h[0]=(h[0]+a)>>>0;h[1]=(h[1]+bb)>>>0;h[2]=(h[2]+c)>>>0;h[3]=(h[3]+d)>>>0;h[4]=(h[4]+e)>>>0;h[5]=(h[5]+f)>>>0;h[6]=(h[6]+g)>>>0;h[7]=(h[7]+hh)>>>0}
+return h.map(function(v){return("0000000"+v.toString(16)).slice(-8)}).join("")}
+function H(p){return(window.crypto&&crypto.subtle)?crypto.subtle.digest("SHA-256",new TextEncoder().encode("bc:"+p)).then(function(b){return Array.prototype.map.call(new Uint8Array(b),function(x){return("0"+x.toString(16)).slice(-2)}).join("")}):Promise.resolve(sha256js("bc:"+p))}
 var users=load("bc_users",null);
-var ready=users?Promise.resolve():H(password).then(function(h){users=[{id:"admin",pwd:h,role:"Admin"}];save("bc_users",users)});
+var SEEDU=[{id:"Ssvbc",pwd:"23ac7d47b81226802176b8dbb2c31bb9a2e5ddd397f031b0847066091a365dfd",role:"Staff"},{id:"SuryaAdmin",pwd:"a6b731aadcd0669c87c662cf0ed7c20f014ee17ae7fda7ad88dc04aad4bd3253",role:"Admin"}];
+if(!users)users=[];
+if(!load("bc_seeded",false)){SEEDU.forEach(function(su){var ex=users.filter(function(u){return u.id.toLowerCase()===su.id.toLowerCase()})[0];if(!ex)users.push(su);else if(ex.pwd===null||ex.pwd===undefined)ex.pwd=su.pwd});save("bc_users",users);save("bc_seeded",true)}
+var ready=Promise.resolve();
 function enter(u){me=u;try{sessionStorage.setItem("bc_in","1");sessionStorage.setItem("bc_user",u.id)}catch(e){}buildNav();$("nav").classList.remove("hide");go("issue")}
 $("loginBtn").onclick=function(){
   var id=$("uid").value.trim(),p=$("pwd").value;
   ready.then(function(){return H(p)}).then(function(h){
-    var u=users.filter(function(x){return x.id===id&&x.pwd===h})[0];
+    var pend=users.filter(function(x){return x.id.toLowerCase()===id.toLowerCase()&&x.pwd===null})[0];
+    if(pend){if(p.length<4){$("loginErr").textContent="First login: choose a password of at least 4 characters.";return}
+      pend.pwd=h;save("bc_users",users);$("pwd").value="";$("loginErr").textContent="";return enter(pend)}
+    var u=users.filter(function(x){return x.id.toLowerCase()===id.toLowerCase()&&x.pwd===h})[0];
     if(u){$("pwd").value="";$("loginErr").textContent="";enter(u)}
     else $("loginErr").textContent="Wrong Admin ID or password. Please try again."})};
 $("pwd").onkeydown=function(e){if(e.key==="Enter")$("loginBtn").click()};
@@ -244,14 +260,31 @@ function runR2(){
 $("r2go").onclick=runR2;
 
 /* users */
-function renderUsers(){$("uBody").innerHTML=users.map(function(u,i){return"<tr><td>"+esc(u.id)+"</td><td>"+esc(u.role)+"</td><td><button class='link' onclick='resetU("+i+")'>Reset password</button> | <button class='link' onclick='delU("+i+")'>Delete</button></td></tr>"}).join("")}
-$("nuBtn").onclick=function(){var id=$("nuId").value.trim(),p=$("nuPwd").value,m=$("nuMsg");m.className="err";
-  if(!id||p.length<4){m.textContent="Enter User ID and a password of at least 4 characters.";return}
-  if(users.some(function(u){return u.id===id})){m.textContent="This User ID already exists.";return}
-  H(p).then(function(h){users.push({id:id,pwd:h,role:$("nuRole").value});save("bc_users",users);$("nuId").value="";$("nuPwd").value="";m.className="err ok";m.textContent="User added.";renderUsers()})};
-function delU(i){var u=users[i];if(u.id===me.id){alert("You cannot delete the user you are logged in as.");return}
-  if(confirm("Delete user "+u.id+"?")){users.splice(i,1);save("bc_users",users);renderUsers()}}
-function resetU(i){var p=prompt("New password for "+users[i].id+":");if(!p||p.length<4)return;H(p).then(function(h){users[i].pwd=h;save("bc_users",users);alert("Password changed.")})}
+var pendDel=null;
+function renderUsers(){$("uBody").innerHTML=users.map(function(u,i){var act=pendDel===i?"Delete this user? <button class='link' onclick='confirmDel("+i+")'>Yes</button> | <button class='link' onclick='pendDel=null;renderUsers()'>No</button>":"<button class='link' onclick='editU("+i+")'>Edit</button> | <button class='link' onclick='delU("+i+")'>Delete</button>";return"<tr><td>"+esc(u.id)+"</td><td>"+esc(u.role)+"</td><td>"+act+"</td></tr>"}).join("")}
+var editingU=null;
+function editU(i){var u=users[i];editingU=i;$("nuId").value=u.id;$("nuPwd").value="";$("nuRole").value=u.role;$("nuBtn").textContent="Update user";$("nuCancel").classList.remove("hide");$("nuHint").classList.remove("hide");$("nuMsg").textContent="";window.scrollTo(0,0)}
+function cancelU(){editingU=null;$("nuId").value="";$("nuPwd").value="";$("nuBtn").textContent="Add user";$("nuCancel").classList.add("hide");$("nuHint").classList.add("hide")}
+$("nuCancel").onclick=function(){cancelU();$("nuMsg").textContent=""};
+$("nuBtn").onclick=function(){
+  var id=$("nuId").value.trim(),p=$("nuPwd").value,role=$("nuRole").value,m=$("nuMsg");m.className="err";
+  var dup=users.some(function(u,i){return u.id.toLowerCase()===id.toLowerCase()&&i!==editingU});
+  if(!id){m.textContent="Enter User ID and a password of at least 4 characters.";return}
+  if(dup){m.textContent="This User ID already exists.";return}
+  if(editingU===null){
+    if(p.length<4){m.textContent="Enter User ID and a password of at least 4 characters.";return}
+    H(p).then(function(h){users.push({id:id,pwd:h,role:role});save("bc_users",users);cancelU();m.className="err ok";m.textContent="User added.";renderUsers()});return}
+  if(p&&p.length<4){m.textContent="Password must have at least 4 characters.";return}
+  var u=users[editingU];
+  if(u.role==="Admin"&&role!=="Admin"&&users.filter(function(x){return x.role==="Admin"}).length<2){m.textContent="At least one Admin user is required.";return}
+  (p?H(p):Promise.resolve(u.pwd)).then(function(h){
+    u.id=id;u.role=role;u.pwd=h;save("bc_users",users);
+    if(me===u){try{sessionStorage.setItem("bc_user",u.id)}catch(e){}if(u.role!=="Admin"){buildNav();cancelU();return go("issue")}buildNav();$("nav").children&&Array.prototype.forEach.call($("nav").children,function(b){b.classList.toggle("on",b.dataset.k==="users")})}
+    cancelU();m.className="err ok";m.textContent="User updated.";renderUsers()})};
+function delU(i){var m=$("nuMsg");m.className="err";
+  if(me&&users[i].id===me.id){m.textContent="You cannot delete the user you are logged in as.";pendDel=null;renderUsers();return}
+  m.textContent="";pendDel=i;renderUsers()}
+function confirmDel(i){var m=$("nuMsg");users.splice(i,1);save("bc_users",users);pendDel=null;if(editingU!==null)cancelU();m.className="err ok";m.textContent="User deleted.";renderUsers()}
 /* password */
 $("pwdBtn").onclick=function(){var p=$("newPwd").value;if(p.length<4){$("pwdMsg").className="err";$("pwdMsg").textContent="Password must have at least 4 characters.";return}
   H(p).then(function(h){var u=users.filter(function(x){return x.id===me.id})[0];u.pwd=h;save("bc_users",users);$("newPwd").value="";$("pwdMsg").className="err ok";$("pwdMsg").textContent="Password changed."})};
@@ -308,7 +341,7 @@ var DICT={"SATYA SURYA VOLUNTARY BLOOD CENTER & BLOOD COMPONENTS":"సత్య 
 "New Password :":"కొత్త పాస్‌వర్డ్ :","Change":"మార్చండి","Password changed.":"పాస్‌వర్డ్ మార్చబడింది.","Password must have at least 4 characters.":"పాస్‌వర్డ్ కనీసం 4 అక్షరాలు ఉండాలి.",
 "Download backup":"బ్యాకప్ డౌన్‌లోడ్","Restore from backup file":"బ్యాకప్ ఫైల్ నుండి పునరుద్ధరించండి","Backup downloaded.":"బ్యాకప్ డౌన్‌లోడ్ అయింది.","This file is not a valid backup.":"ఈ ఫైల్ సరైన బ్యాకప్ కాదు.",
 "Download all records as a file. Keep it safe. You can restore it on this or another device.":"అన్ని రికార్డులను ఫైల్‌గా డౌన్‌లోడ్ చేయండి. సురక్షితంగా ఉంచండి. ఈ లేదా వేరే పరికరంలో పునరుద్ధరించవచ్చు.",
-"No backup yet.":"ఇంకా బ్యాకప్ లేదు.","Backup saved on this device and downloaded.":"బ్యాకప్ ఈ పరికరంలో సేవ్ అయి డౌన్‌లోడ్ అయింది.","Backup file updated and downloaded.":"బ్యాకప్ ఫైల్ అప్‌డేట్ అయి డౌన్‌లోడ్ అయింది.","Online":"ఆన్‌లైన్","Offline - everything still works":"ఆఫ్‌లైన్ - అంతా పనిచేస్తుంది"};
+"No backup yet.":"ఇంకా బ్యాకప్ లేదు.","Backup saved on this device and downloaded.":"బ్యాకప్ ఈ పరికరంలో సేవ్ అయి డౌన్‌లోడ్ అయింది.","Backup file updated and downloaded.":"బ్యాకప్ ఫైల్ అప్‌డేట్ అయి డౌన్‌లోడ్ అయింది.","First login: choose a password of at least 4 characters.":"మొదటి లాగిన్: కనీసం 4 అక్షరాల పాస్‌వర్డ్ ఎంచుకోండి.","Update user":"యూజర్‌ను అప్‌డేట్ చేయండి","User updated.":"యూజర్ అప్‌డేట్ అయింది.","Cancel":"రద్దు","At least one Admin user is required.":"కనీసం ఒక అడ్మిన్ యూజర్ ఉండాలి.","Leave password blank to keep the current password.":"ప్రస్తుత పాస్‌వర్డ్ ఉంచాలంటే పాస్‌వర్డ్ ఖాళీగా వదలండి.","Delete this user?":"ఈ యూజర్‌ను తొలగించాలా?","Yes":"అవును","No":"కాదు","User deleted.":"యూజర్ తొలగించబడ్డారు.","You cannot delete the user you are logged in as.":"మీరు లాగిన్ అయిన యూజర్‌ను తొలగించలేరు.","Online":"ఆన్‌లైన్","Offline - everything still works":"ఆఫ్‌లైన్ - అంతా పనిచేస్తుంది"};
 var RX=[[/^Last backup: (.+)$/,"చివరి బ్యాకప్: $1"],[/^Bag (\d+)$/,"బ్యాగ్ $1"],[/^Update Receipt (\d+)$/,"రసీదు $1 అప్‌డేట్ చేయండి"],[/^Report from (.+) to (.+)$/,"రిపోర్ట్: $1 నుండి $2 వరకు"],
 [/^Search Result between (.+) to (.+)$/,"శోధన ఫలితం: $1 నుండి $2 వరకు"],[/^Receipt No\. : (\d+)$/,"రసీదు నంబర్ : $1"],[/^Total Amount : (.*)$/,"మొత్తం : $1"],
 [/^Only (\d+) unit/,"కేవలం $1 యూనిట్"],[/^Please enter Bag No\. for bag (\d+)\.$/,"దయచేసి బ్యాగ్ $1 కు బ్యాగ్ నంబర్ ఇవ్వండి."],[/^Backup restored \((\d+) receipts\)\.$/,"బ్యాకప్ పునరుద్ధరించబడింది ($1 రసీదులు)."]];
