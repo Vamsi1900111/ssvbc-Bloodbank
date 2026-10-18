@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1d4ed8">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Satya Surya Voluntary Blood Center - Admin Panel</title>
+<style>
+:root{--bg:#eef3fb;--card:#fff;--text:#1b2a41;--muted:#5d6b82;--blue:#1d4ed8;--line:#cfd9ea}
+@media (prefers-color-scheme:dark){:root{--bg:#10151d;--card:#1a212c;--text:#e8edf5;--muted:#9aa7bb;--blue:#5b9bff;--line:#33405a}}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.5 Arial,'Noto Sans Telugu','Nirmala UI',Gautami,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+header{background:#1d4ed8;color:#fff;padding:12px 14px;text-align:center;position:relative}
+.lang{position:absolute;top:8px;right:8px;display:flex;gap:4px}
+.lang button{margin:0;padding:5px 9px;font-size:13px;background:transparent;color:#fff;border:1px solid #fff}
+.lang button.on{background:#fff;color:#1d4ed8;font-weight:bold}
+.logo{width:52px;height:52px;display:block;margin:0 auto 4px}
+header h1{margin:0;font-size:17px}header p{margin:3px 0 0;font-size:12px;opacity:.9}
+nav{display:flex;flex-wrap:wrap;gap:4px 14px;justify-content:center;background:#4499f5;padding:10px 8px}
+nav button{margin:0;padding:4px 2px;font-size:14px;font-weight:bold;background:transparent;color:#fff;text-decoration:underline;border:0;border-radius:0}
+nav button.on{background:#1d4ed8;padding:4px 8px;border-radius:4px;text-decoration:none}
+th{background:#4499f5!important;color:#fff}
+main{max-width:900px;margin:0 auto;padding:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:14px}
+h2{margin:0 0 12px;font-size:19px}
+label{display:block;font-weight:bold;margin:12px 0 4px}
+input,select{width:100%;padding:11px;font-size:16px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text)}
+button{padding:11px 18px;font-size:16px;border:0;border-radius:6px;background:var(--blue);color:#fff;cursor:pointer;margin-top:12px}
+body.dark-fix button{color:#000}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.bagrow{border:1px solid var(--line);border-radius:6px;padding:10px;margin-top:10px}
+.bagrow b{display:block;margin-bottom:4px}
+.err{color:#c0262d;min-height:20px;margin-top:8px}.ok{color:#1b7a3a}
+.wrap{overflow-x:auto;margin-top:12px}
+table{width:100%;border-collapse:collapse;font-size:14px;white-space:nowrap}
+th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line)}
+th{background:var(--bg)}
+tfoot td{font-weight:bold}
+.hide{display:none}
+.sub{color:var(--muted);font-size:14px}
+.rcpt p{margin:6px 0}
+.link{background:none;border:0;color:var(--blue);padding:0;margin:0;font-size:14px;text-decoration:underline}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:14px}
+#net{font-size:12px;color:var(--muted);text-align:center}
+@media (max-width:520px){.row,.row3{grid-template-columns:1fr}}
+@media print{header,nav,footer,#net,.noprint{display:none!important}.card{border:0}body{background:#fff;color:#000}}
+</style>
+</head>
+<body>
+<header>
+<div class="lang"><button id="lgEn">English</button><button id="lgTe">తెలుగు</button></div>
+<svg class="logo" viewBox="0 0 64 64" aria-label="Blood drop logo"><path d="M32 4C32 4 12 28 12 41a20 20 0 0 0 40 0C52 28 32 4 32 4z" fill="#fff"/><path d="M32 22v24M20 34h24" stroke="#1d4ed8" stroke-width="6" stroke-linecap="round"/></svg>
+<h1>SATYA SURYA VOLUNTARY BLOOD CENTER &amp; BLOOD COMPONENTS</h1>
+<p>D.No : 46-1-3, Nandam Ganiraju Junction, T.T.D. Kalyanmandapam Road, RAJAMAHENDRAVARAM-533 103.</p>
+</header>
+<nav id="nav" class="hide"></nav>
+<main>
+
+<section id="login" class="card">
+<h2>ADMIN AREA</h2>
+<label for="uid">Admin ID :</label><input id="uid" autocomplete="username">
+<label for="pwd">Password :</label><input id="pwd" type="password" autocomplete="current-password">
+<button id="loginBtn">Login</button>
+<div class="err" id="loginErr"></div>
+</section>
+
+<section id="issue" class="card hide">
+<h2>Issue Blood Bag</h2>
+<label for="cnt">How many bags :</label>
+<select id="cnt"></select>
+<div id="issueForm" class="hide">
+<div class="row"><div><label>Name</label><input id="pName"></div><div><label>Age</label><input id="pAge" placeholder="e.g. 14Y"></div></div>
+<div class="row"><div><label>Gender</label><select id="pGender"><option value="MALE">MALE</option><option value="FEMALE">FEMALE</option><option value="OTHER">OTHER</option></select></div><div><label>Mobile</label><input id="pMobile" type="tel" maxlength="10"></div></div>
+<label>Hospital/Doctor Name</label><input id="pHosp" list="hospList" autocomplete="off">
+<datalist id="hospList"></datalist>
+<div id="bagRows"></div>
+<button id="saveIssue">Save &amp; Print Receipt</button>
+<div class="err" id="iErr"></div>
+</div>
+</section>
+
+<section id="receipt" class="card hide rcpt"></section>
+
+<section id="rep1" class="card hide">
+<h2>View Report</h2><div class="sub" id="rep1t"></div>
+<div class="row"><div><label>Bill from</label><input id="r1a" type="number" min="1"></div><div><label>to</label><input id="r1b" type="number" min="1"></div></div>
+<div class="row"><div><label>Date From</label><input id="r1d1" type="date"></div><div><label>to</label><input id="r1d2" type="date"></div></div>
+<button id="r1go" class="noprint">Submit</button>
+<div class="wrap"><table><thead><tr><th>Rcpt No.</th><th>Date</th><th>Time</th><th>Name</th><th>Bags</th><th>Price</th><th>Amount</th><th>Print</th></tr></thead><tbody id="r1body"></tbody><tfoot id="r1foot"></tfoot></table></div>
+<button class="noprint" onclick="window.print()">Print</button>
+</section>
+
+<section id="rep2" class="card hide">
+<h2 id="rep2h">View Bags Report</h2><div class="sub" id="rep2t"></div>
+<div id="hospBox" class="hide"><label>Select Hospital/Doctor Name</label><select id="r2h"></select></div>
+<div class="row"><div><label>From</label><input id="r2d1" type="date"></div><div><label>to</label><input id="r2d2" type="date"></div></div>
+<button id="r2go">Search</button>
+<div class="wrap"><table><thead id="r2head"></thead><tbody id="r2body"></tbody><tfoot id="r2foot"></tfoot></table></div>
+</section>
+
+<section id="pwdPage" class="card hide">
+<h2>Change Password</h2>
+<label>New Password :</label><input id="newPwd" type="password">
+<button id="pwdBtn">Change</button>
+<div class="err" id="pwdMsg"></div>
+</section>
+
+<section id="usersPage" class="card hide">
+<h2>Manage Users</h2>
+<div class="row3"><div><label>User ID</label><input id="nuId"></div><div><label>Password</label><input id="nuPwd" type="password"></div><div><label>Role</label><select id="nuRole"><option value="Staff">Staff</option><option value="Admin">Admin</option></select></div></div>
+<button id="nuBtn">Add user</button><div class="err" id="nuMsg"></div>
+<div class="wrap"><table><thead><tr><th>User ID</th><th>Role</th><th>Action</th></tr></thead><tbody id="uBody"></tbody></table></div>
+</section>
+
+<section id="backup" class="card hide">
+<h2>Backup</h2>
+<p class="sub">Download all records as a file. Keep it safe. You can restore it on this or another device.</p>
+<p class="sub" id="lastBk"></p>
+<button id="bkBtn">Download backup</button>
+<label style="margin-top:18px">Restore from backup file</label>
+<input id="rsFile" type="file" accept=".json">
+<div class="err" id="bkMsg"></div>
+</section>
+
+<div id="net"></div>
+</main>
+<footer>Copyright © VSHAWS. All Rights Reserved</footer>
+
+<script>
+var TYPES=["WB","PRBC","PLT","FFP","CRYO","SDP"],DEFAULT_PRICE=1550;
+var HOSP=["A.R.K.HOSPITAL","A.S.L. HOSPITAL","AAROGYA HOSPITAL","ADARSH HOSPITAL","AMMA HOSPITAL","ANDHAR PILES CLINIC","ANDHRA CLINIC","ANUSHA CRITICAL CARE","ANUSHA HOSPITAL","APARNA CARE HOSPITAL","APOLLO DIALYSIS CLINIC","BOLLINENI HOSPITALS","CHANAKYA HOSPITAL","CHANDANA HOSPITAL","CHANDRAKALA HOSPITAL","CHC GOKAVARAM","CITY NEURO CARE","COMMUNITY HEALTH CENTER,GOKAVARAM","COMMUNITY HEALTH CENTER,GOPALAPURAM","COMMUNITY HEALTH CENTER,KADIYAM","COMMUNITY HEALTH CENTRE JAGGAMPETA","COMMUNITY HEALTH CENTRE, NIDADAVOLE","DELTA HOSPITAL","DURGA HOSPITAL","FIRST PLUS HOSPITAL","G.S.L SWATANTRA HOSPITAL","G.V.S.HOSPITAL","GANDHI HOSPITAL","GODAVARI HOSPITAL","GOUTHAM UROLOGY AND KIDNEY CENTER","GOVERNMENT GENERAL HOSPITAL, RAJAHMUNDRY","GOVERNMENT HOSPITAL ANAPRATHI","GOWTHAMI HOSPITAL","GOWTHAMI NURSING HOME","GSL TRUST CANCER HOSPITAL","HARITHA NEURO CENTRE","HARSHA HOSPITAL","HEALTH HOSPITAL","HELIOS HOSPITAL","IN ME NURSING HOME,MANDAPETA","JABILLI MULTI SPECIALITY HOSPITAL","JAYA NURSING HOME","JUPITER HOSPITAL","K.P.EMERGENCY HOSPITAL","K.V.R.HOSPITAL","KIFY HOSPITAL","KIMS BOLLINENI HOSPITALS","KRANTI NURSING HOME","KRISHNAVENI HOSPITAL","KSL GASTRO LIVER SKIN HOSPITAL","LALITHA PRIYA HOSPITAL","LOTUS SUPER SPECIALITY HOSPITAL","MAGNA MOTHER & CHILD HOSPITAL","MEDICARE HOSPITAL","MEDICOVER HOSPITAL","MEDISAFE HOSPITAL","MOTHER MULTI SPECIALITY HOSPITAL","NEST HOSPITAL","PARDHASARADHI HOSPITAL","PHOENIX HOSPITAL","PRAGATHI NURSING HOME","PULSE HOSPITAL","R.K HOSPITAL","R.R.HOSPITAL","R.R.POLY CLINIC","R.S NEURO MULTI SPECIALITY HOSPITAL","RACC ICU HOSPITAL","RAJAHMUNDRY ORTHOPAEDIC HOSPITAL","RAMA CHANDRA HOSPITAL","RAMA NURSING HOME","RAMESH CHEST CLINIC","RATNA MOTHER & CHILD HOSPITAL","RAVI CHAITHANYA HOSPITAL","REVATHI HOSPITAL","S.R HOSPITAL","SAI HEALTH CARE","SAI HOSPITAL","SARADHI HOSPITAL","SATYA KIDNEY MULTISPECIALITY HOSPITAL","SAVSTHA EMERGENCY AND MULTI SPECIALITY HOSPITAL","SESHAGIRI HOSPITAL,NIDADAVOLU","SIGN HOSPITAL","SIRTHA GASTRO HOSPITAL","SITA GASTRO ENTEROLOGY HOSPITAL","SOUBGYAVATHI NURSING HOME","SREE HOSPITAL","SRI BIKKINA NURSING HOME(MANDAPETA)","SRI DIVYA HOSPITAL","SRI GANGA EMERGENCY HOSPITAL","SRI HARITHA HOSPITAL","SRI HARSHA MULTI SPECIALITY HOSPITAL","SRI JANAKI RAMA NURSING HOME","SRI JANATHA HOSPITAL","SRI MEDHA HOSPITAL","SRI RAVI HOSPITAL","SRI SAI RAMA HOSPITAL","SRI SAKTHI HOSPITAL","SRI SRINIVASA HOSPITAL","SRI VIRINCHI HOSPITAL","SUNRISE HOSPITAL","SUNSTAR HOSPITAL","SURYA HOSPITAL","SWAMI VAIDYALAYA HOSPITAL","T.S.K HOSPITAL","THOLATH MEMORIAL MULTI SPECIALITY HOSPITAL","UNIVERSAL HOSPITAL","VASAVI SRI MULTI SPECIALITY HOSPITAL","VENKATA DURGA HOSPITAL","VIJAY HOSPITAL","VIJAYA BHARATHI CHEST INSTITUTE","VISHWAK HOSPITAL","VISION HOSPITAL"];
+
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+var mem={};
+function load(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return mem[k]!==undefined?mem[k]:d}}
+function save(k,v){mem[k]=v;try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function T(h,m,sec){return new Date(2026,9,18,h,m,sec).getTime()}
+var SEED=[];
+var receipts=load("bc_receipts",SEED),customH=load("bc_hosp",[]),password=load("bc_pwd","admin123");
+function pad(n){return n<10?"0"+n:""+n}
+function dkey(t){var d=new Date(t);return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
+function dshow(t){var d=new Date(t);return pad(d.getDate())+"-"+pad(d.getMonth()+1)+"-"+d.getFullYear()}
+function tshow(t){var d=new Date(t),h=d.getHours(),ap=h>=12?"pm":"am";h=h%12||12;return pad(h)+":"+pad(d.getMinutes())+":"+pad(d.getSeconds())+ap}
+function total(r){return r.bags.reduce(function(s,b){return s+Number(b.amt||0)},0)}
+
+var pages={issue:"Issue Bags",rep1:"View Reports",rep2:"Bags Reports",rep3:"Hospital Wise",rep4:"Bag ID Reports",users:"Manage Users",pwdPage:"Change Password",backup:"Backup",out:"Logout"};
+var ids=["login","issue","receipt","rep1","rep2","pwdPage","backup","usersPage"],me=null,editing=null,mode="bags";
+function buildNav(){var n=$("nav");n.innerHTML="";Object.keys(pages).forEach(function(k){if(me&&me.role!=="Admin"&&(k==="users"||k==="backup"))return;var b=document.createElement("button");b.textContent=pages[k];b.dataset.k=k;b.onclick=function(){go(k)};n.appendChild(b)})}
+function go(k){
+  if(k==="out"){try{sessionStorage.removeItem("bc_in");sessionStorage.removeItem("bc_user")}catch(e){}me=null;$("nav").classList.add("hide");return showSec("login")}
+  var sec=k;if(k==="users"){sec="usersPage";renderUsers()}
+  if(k==="rep3"||k==="rep4"||k==="rep2"){sec="rep2";mode=k==="rep4"?"ids":"bags";
+    $("rep2h").textContent=k==="rep3"?"Hospital Wise Bags Report":(k==="rep4"?"Bag ID Report":"View Bags Report");
+    $("hospBox").classList.toggle("hide",k!=="rep3");buildHead();$("r2body").innerHTML="";$("r2foot").innerHTML="";$("rep2t").textContent="";}
+  showSec(sec);
+  Array.prototype.forEach.call($("nav").children,function(b){b.classList.toggle("on",b.dataset.k===k)});
+  if(k==="rep1")runR1();if(k==="rep2"||k==="rep3"||k==="rep4")runR2();
+  if(k==="issue"){resetIssue();editing=null}if(k==="backup")showLast();
+}
+function showSec(id){ids.forEach(function(s){$(s).classList.toggle("hide",s!==id)});window.scrollTo(0,0)}
+
+/* login */
+function H(p){return(window.crypto&&crypto.subtle)?crypto.subtle.digest("SHA-256",new TextEncoder().encode("bc:"+p)).then(function(b){return Array.prototype.map.call(new Uint8Array(b),function(x){return("0"+x.toString(16)).slice(-2)}).join("")}):Promise.resolve("p:"+p)}
+var users=load("bc_users",null);
+var ready=users?Promise.resolve():H(password).then(function(h){users=[{id:"admin",pwd:h,role:"Admin"}];save("bc_users",users)});
+function enter(u){me=u;try{sessionStorage.setItem("bc_in","1");sessionStorage.setItem("bc_user",u.id)}catch(e){}buildNav();$("nav").classList.remove("hide");go("issue")}
+$("loginBtn").onclick=function(){
+  var id=$("uid").value.trim(),p=$("pwd").value;
+  ready.then(function(){return H(p)}).then(function(h){
+    var u=users.filter(function(x){return x.id===id&&x.pwd===h})[0];
+    if(u){$("pwd").value="";$("loginErr").textContent="";enter(u)}
+    else $("loginErr").textContent="Wrong Admin ID or password. Please try again."})};
+$("pwd").onkeydown=function(e){if(e.key==="Enter")$("loginBtn").click()};
+
+/* issue */
+function hospitals(){return HOSP.concat(customH).sort()}
+function fillHosp(){$("hospList").innerHTML=hospitals().map(function(h){return"<option value=\""+esc(h)+"\">"}).join("");
+  $("r2h").innerHTML=hospitals().map(function(h){return"<option>"+esc(h)+"</option>"}).join("")}
+$("cnt").innerHTML="<option value=''>Please Select</option>"+[1,2,3,4,5,6,7,8,9,10].map(function(n){return"<option>"+n+"</option>"}).join("");
+function resetIssue(){$("cnt").value="";$("issueForm").classList.add("hide");$("iErr").textContent="";["pName","pAge","pMobile","pHosp"].forEach(function(i){$(i).value=""})}
+$("cnt").onchange=function(){
+  if(!editing)$("saveIssue").textContent="Save & Print Receipt";
+  var n=parseInt($("cnt").value,10);if(!n){$("issueForm").classList.add("hide");return}
+  var h="";for(var i=1;i<=n;i++)h+="<div class='bagrow'><b>Bag "+i+"</b><div class='row3'><div><label>Bag No.</label><input class='bno' type='number'></div><div><label>Bag Type</label><select class='btype'>"+TYPES.map(function(t){return"<option"+(t==="PRBC"?" selected":"")+">"+t+"</option>"}).join("")+"</select></div><div><label>Amount</label><input class='bamt' type='number' value='"+DEFAULT_PRICE+"'></div></div></div>";
+  $("bagRows").innerHTML=h;$("issueForm").classList.remove("hide")};
+$("saveIssue").onclick=function(){
+  var name=$("pName").value.trim(),hosp=$("pHosp").value.trim().toUpperCase(),err=$("iErr");
+  if(!name||!hosp){err.textContent="Please enter Name and Hospital/Doctor Name.";return}
+  var nos=document.querySelectorAll(".bno"),ty=document.querySelectorAll(".btype"),am=document.querySelectorAll(".bamt"),bags=[],seen={};
+  for(var i=0;i<nos.length;i++){var no=nos[i].value.trim();if(!no){err.textContent="Please enter Bag No. for bag "+(i+1)+".";return}
+    if(seen[no]){err.textContent="Bag No. "+no+" is entered twice.";return}seen[no]=1;
+    bags.push({no:no,type:ty[i].value,amt:Number(am[i].value)||0})}
+  var dup=[];receipts.forEach(function(r){if(r.no===editing)return;r.bags.forEach(function(b){if(seen[b.no])dup.push(b.no)})});
+  if(dup.length&&!confirm("Bag No. "+dup.join(", ")+" already issued before. Save anyway?"))return;
+  if(HOSP.indexOf(hosp)<0&&customH.indexOf(hosp)<0){customH.push(hosp);save("bc_hosp",customH);fillHosp()}
+  if(editing){var old=receipts.filter(function(x){return x.no===editing})[0];
+    old.name=name.toUpperCase();old.age=$("pAge").value.trim();old.gender=$("pGender").value;old.mobile=$("pMobile").value.trim();old.hospital=hosp;old.bags=bags;
+    save("bc_receipts",receipts);editing=null;return showReceipt(old)}
+  var no=receipts.length?Math.max.apply(null,receipts.map(function(r){return r.no}))+1:1;
+  var r={no:no,ts:Date.now(),name:name.toUpperCase(),age:$("pAge").value.trim(),gender:$("pGender").value,mobile:$("pMobile").value.trim(),hospital:hosp,bags:bags};
+  receipts.push(r);save("bc_receipts",receipts);showReceipt(r)};
+
+function showReceipt(r){
+  $("receipt").innerHTML="<h2>Print Receipt</h2><p><b>Receipt No. : "+r.no+"</b></p><p><span>Name :</span> "+esc(r.name)+" &nbsp; <span>Age :</span> "+esc(r.age)+"</p><p><span>Gender :</span> "+esc(r.gender)+" &nbsp; <span>Mobile :</span> "+esc(r.mobile)+"</p><p><span>Hospital/Doctor Name :</span> "+esc(r.hospital)+"</p><p><span>Date and Time :</span> "+dshow(r.ts)+" "+tshow(r.ts)+"</p><div class='wrap'><table><thead><tr><th>Sno.</th><th>Bag No.</th><th>Bag Type</th><th>Amount</th></tr></thead><tbody>"+r.bags.map(function(b,i){return"<tr><td>"+(i+1)+"</td><td>"+esc(b.no)+"</td><td>"+esc(b.type)+"</td><td>"+b.amt+"</td></tr>"}).join("")+"</tbody><tfoot><tr><td colspan=3>Total Amount :</td><td>"+total(r)+"</td></tr></tfoot></table></div><button class='noprint' onclick='window.print()'>Print</button> <button class='noprint' onclick=\"go('issue')\">New issue</button>";
+  showSec("receipt")}
+
+/* reports */
+var t0=dkey(Date.now());["r1d1","r1d2","r2d1","r2d2"].forEach(function(i){$(i).value=t0});
+function inRange(r,a,b){var k=dkey(r.ts);return k>=a&&k<=b}
+function fd(v){var p=v.split("-");return p[2]+"-"+p[1]+"-"+p[0]}
+function runR1(){
+  var a=$("r1d1").value||t0,b=$("r1d2").value||a,n1=parseInt($("r1a").value,10),n2=parseInt($("r1b").value,10);
+  var rows=receipts.filter(function(r){return inRange(r,a,b)&&(!n1||r.no>=n1)&&(!n2||r.no<=n2)}).sort(function(x,y){return x.ts-y.ts});
+  $("rep1t").textContent="Report from "+fd(a)+" to "+fd(b);
+  var tb=0,ta=0;
+  $("r1body").innerHTML=rows.length?rows.map(function(r){var t=total(r);tb+=r.bags.length;ta+=t;
+    return"<tr><td>"+r.no+"</td><td>"+dshow(r.ts)+"</td><td>"+tshow(r.ts)+"</td><td>"+esc(r.name)+"|*"+esc(r.hospital)+"*</td><td>"+r.bags.length+"</td><td>"+Math.round(t/r.bags.length)+"</td><td>"+t.toFixed(2)+"</td><td><button class='link' onclick='printNo("+r.no+")'>Print</button> | <button class='link' onclick='editRc("+r.no+")'>Edit</button></td></tr>"}).join(""):"<tr><td colspan=8>No records found.</td></tr>";
+  $("r1foot").innerHTML="<tr><td colspan=4></td><td>"+tb+"</td><td></td><td>"+ta.toFixed(2)+"</td><td></td></tr>"}
+$("r1go").onclick=runR1;
+function editRc(n){
+  var r=receipts.filter(function(x){return x.no===n})[0];if(!r)return;
+  go("issue");editing=n;
+  $("cnt").value=String(r.bags.length);$("cnt").onchange();
+  $("pName").value=r.name;$("pAge").value=r.age||"";$("pGender").value=r.gender||"MALE";$("pMobile").value=r.mobile||"";$("pHosp").value=r.hospital;
+  var a=document.querySelectorAll(".bno"),b=document.querySelectorAll(".btype"),c=document.querySelectorAll(".bamt");
+  r.bags.forEach(function(x,i){a[i].value=x.no;b[i].value=x.type;c[i].value=x.amt});
+  $("saveIssue").textContent="Update Receipt "+n}
+function printNo(n){var r=receipts.filter(function(x){return x.no===n})[0];if(r)showReceipt(r)}
+function buildHead(){$("r2head").innerHTML="<tr><th>Date</th>"+(mode==="ids"?"<th>Time</th>":"")+TYPES.map(function(t){return"<th>"+t+"</th>"}).join("")+"<th>No. of Bags</th><th>Amount</th></tr>"}
+function runR2(){
+  var a=$("r2d1").value||t0,b=$("r2d2").value||a,h=$("hospBox").classList.contains("hide")?null:$("r2h").value;
+  var rows=receipts.filter(function(r){return inRange(r,a,b)&&(!h||r.hospital===h)}).sort(function(x,y){return x.ts-y.ts});
+  $("rep2t").textContent="Search Result between "+fd(a)+" to "+fd(b);
+  var cnt={},tb=0,ta=0;TYPES.forEach(function(t){cnt[t]=0});
+  $("r2body").innerHTML=rows.length?rows.map(function(r){var c="";
+    TYPES.forEach(function(t){var l=r.bags.filter(function(x){return x.type===t});cnt[t]+=l.length;
+      c+="<td>"+(l.length?(mode==="ids"?l.map(function(x){return esc(x.no)}).join(", "):l.length):"--")+"</td>"});
+    tb+=r.bags.length;ta+=total(r);
+    return"<tr><td>"+(mode==="ids"?dshow(r.ts)+"</td><td>"+tshow(r.ts):dshow(r.ts)+" "+tshow(r.ts))+"</td>"+c+"<td>"+r.bags.length+"</td><td>"+total(r)+"</td></tr>"}).join(""):"<tr><td colspan=10>No records found.</td></tr>";
+  $("r2foot").innerHTML="<tr><td"+(mode==="ids"?" colspan=2":"")+"></td>"+TYPES.map(function(t){return"<td>"+(cnt[t]||"")+"</td>"}).join("")+"<td>"+tb+"</td><td>Total Amount : "+ta+"</td></tr>"}
+$("r2go").onclick=runR2;
+
+/* users */
+function renderUsers(){$("uBody").innerHTML=users.map(function(u,i){return"<tr><td>"+esc(u.id)+"</td><td>"+esc(u.role)+"</td><td><button class='link' onclick='resetU("+i+")'>Reset password</button> | <button class='link' onclick='delU("+i+")'>Delete</button></td></tr>"}).join("")}
+$("nuBtn").onclick=function(){var id=$("nuId").value.trim(),p=$("nuPwd").value,m=$("nuMsg");m.className="err";
+  if(!id||p.length<4){m.textContent="Enter User ID and a password of at least 4 characters.";return}
+  if(users.some(function(u){return u.id===id})){m.textContent="This User ID already exists.";return}
+  H(p).then(function(h){users.push({id:id,pwd:h,role:$("nuRole").value});save("bc_users",users);$("nuId").value="";$("nuPwd").value="";m.className="err ok";m.textContent="User added.";renderUsers()})};
+function delU(i){var u=users[i];if(u.id===me.id){alert("You cannot delete the user you are logged in as.");return}
+  if(confirm("Delete user "+u.id+"?")){users.splice(i,1);save("bc_users",users);renderUsers()}}
+function resetU(i){var p=prompt("New password for "+users[i].id+":");if(!p||p.length<4)return;H(p).then(function(h){users[i].pwd=h;save("bc_users",users);alert("Password changed.")})}
+/* password */
+$("pwdBtn").onclick=function(){var p=$("newPwd").value;if(p.length<4){$("pwdMsg").className="err";$("pwdMsg").textContent="Password must have at least 4 characters.";return}
+  H(p).then(function(h){var u=users.filter(function(x){return x.id===me.id})[0];u.pwd=h;save("bc_users",users);$("newPwd").value="";$("pwdMsg").className="err ok";$("pwdMsg").textContent="Password changed."})};
+
+/* backup */
+function idb(mode,fn){return new Promise(function(res,rej){var q=indexedDB.open("bc_fs",1);q.onupgradeneeded=function(){q.result.createObjectStore("h")};q.onsuccess=function(){var tx=q.result.transaction("h",mode),r=fn(tx.objectStore("h"));tx.oncomplete=function(){res(r&&r.result)};tx.onerror=rej};q.onerror=rej})}
+function getHandle(){return idb("readonly",function(st){return st.get("file")}).catch(function(){return null})}
+function setHandle(h){return idb("readwrite",function(st){st.put(h,"file")}).catch(function(){})}
+function showLast(){var b=load("bc_lastbackup",null);$("lastBk").textContent=b?"Last backup: "+dshow(b.at)+" "+tshow(b.at)+" ("+b.count+" receipts)":"No backup yet."}
+$("bkBtn").onclick=function(){
+  var now=new Date(),m=$("bkMsg"),name="blood-center-backup.json";m.className="err ok";
+  var data=JSON.stringify({receipts:receipts,hospitals:customH,users:users,saved:now.toISOString()});
+  save("bc_lastbackup",{at:now.getTime(),count:receipts.length,data:data});showLast();
+  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"application/json"}));a.download=name;document.body.appendChild(a);a.click();a.remove();
+  m.textContent="Backup saved on this device and downloaded.";
+  if(window.showSaveFilePicker){
+    getHandle().then(function(h){
+      if(h)return h.requestPermission({mode:"readwrite"}).then(function(p){if(p!=="granted")throw 0;return h});
+      return showSaveFilePicker({suggestedName:name,types:[{description:"Backup",accept:{"application/json":[".json"]}}]}).then(function(nh){return setHandle(nh).then(function(){return nh})})
+    }).then(function(h){return h.createWritable().then(function(w){return w.write(data).then(function(){return w.close()})})})
+    .then(function(){m.textContent="Backup file updated and downloaded."}).catch(function(){})}};
+$("rsFile").onchange=function(){var f=this.files[0];if(!f)return;var rd=new FileReader();
+  rd.onload=function(){try{var d=JSON.parse(rd.result);if(!d.receipts)throw 0;
+    if(!confirm("Replace current records with this backup?"))return;
+    receipts=d.receipts;customH=d.hospitals||[];if(d.users){users=d.users;save("bc_users",users)}
+    save("bc_receipts",receipts);save("bc_hosp",customH);fillHosp();
+    $("bkMsg").className="err ok";$("bkMsg").textContent="Backup restored ("+receipts.length+" receipts)."}
+    catch(e){$("bkMsg").className="err";$("bkMsg").textContent="This file is not a valid backup."}};
+  rd.readAsText(f)};
+
+function net(){$("net").textContent=navigator.onLine?"Online":"Offline - everything still works"}
+addEventListener("online",net);addEventListener("offline",net);net();
+fillHosp();buildNav();buildHead();
+var inn=false;try{inn=sessionStorage.getItem("bc_in")==="1"}catch(e){}
+if(inn){ready.then(function(){var id=null;try{id=sessionStorage.getItem("bc_user")}catch(e){}
+  var u=users.filter(function(x){return x.id===id})[0];if(u)enter(u)})}
+if("serviceWorker" in navigator){addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}
+/* language */
+var LANG=load("bc_lang","en");
+var DICT={"SATYA SURYA VOLUNTARY BLOOD CENTER & BLOOD COMPONENTS":"సత్య సూర్య వాలంటరీ బ్లడ్ సెంటర్ & బ్లడ్ కాంపోనెంట్స్",
+"ADMIN AREA":"అడ్మిన్ విభాగం","Admin ID :":"అడ్మిన్ ఐడి :","Password :":"పాస్‌వర్డ్ :","Login":"లాగిన్",
+"Wrong Admin ID or password. Please try again.":"అడ్మిన్ ఐడి లేదా పాస్‌వర్డ్ తప్పు. దయచేసి మళ్లీ ప్రయత్నించండి.",
+"Issue Bags":"బ్యాగులు జారీ","View Reports":"రిపోర్టులు చూడండి","Bags Reports":"బ్యాగుల రిపోర్టులు","Hospital Wise":"ఆసుపత్రి వారీగా","Bag ID Reports":"బ్యాగ్ ఐడి రిపోర్టులు","Manage Users":"యూజర్ల నిర్వహణ","Change Password":"పాస్‌వర్డ్ మార్చండి","Backup":"బ్యాకప్","Logout":"లాగ్ అవుట్",
+"Issue Blood Bag":"రక్త బ్యాగ్ జారీ","How many bags (ఎన్ని బ్యాగులు) :":"ఎన్ని బ్యాగులు :","ఎన్ని బ్యాగులు (How many bags) :":"ఎన్ని బ్యాగులు :","Please Select":"దయచేసి ఎంచుకోండి",
+"Name":"పేరు","Age":"వయసు","Gender":"లింగం","MALE":"పురుషుడు","FEMALE":"స్త్రీ","OTHER":"ఇతరులు","Mobile":"మొబైల్","Hospital/Doctor Name":"ఆసుపత్రి / డాక్టర్ పేరు",
+"Bag No.":"బ్యాగ్ నంబర్","Bag Type":"బ్యాగ్ రకం","Amount":"మొత్తం","Save & Print Receipt":"సేవ్ చేసి రసీదు ప్రింట్ చేయండి",
+"Please enter Name and Hospital/Doctor Name.":"దయచేసి పేరు మరియు ఆసుపత్రి / డాక్టర్ పేరు నమోదు చేయండి.",
+"Name :":"పేరు :","Age :":"వయసు :","Gender :":"లింగం :","Mobile :":"మొబైల్ :","Hospital/Doctor Name :":"ఆసుపత్రి / డాక్టర్ పేరు :","Date and Time :":"తేదీ మరియు సమయం :",
+"Print Receipt":"రసీదు ప్రింట్","Sno.":"క్ర.సం.","Total Amount :":"మొత్తం :","Print":"ప్రింట్","New issue":"కొత్త జారీ","Edit":"మార్చు",
+"View Report":"రిపోర్ట్ చూడండి","Rcpt No.":"రసీదు నం.","Date":"తేదీ","Time":"సమయం","Bags":"బ్యాగులు","Price":"ధర","Bill from":"బిల్లు నుండి","to":"వరకు","Date From":"తేదీ నుండి","From":"నుండి","Submit":"సమర్పించండి","No records found.":"రికార్డులు లేవు.",
+"View Bags Report":"బ్యాగుల రిపోర్ట్ చూడండి","Hospital Wise Bags Report":"ఆసుపత్రి వారీగా బ్యాగుల రిపోర్ట్","Bag ID Report":"బ్యాగ్ ఐడి రిపోర్ట్","Select Hospital/Doctor Name":"ఆసుపత్రి / డాక్టర్ ఎంచుకోండి","No. of Bags":"బ్యాగుల సంఖ్య",
+"User ID":"యూజర్ ఐడి","Role":"పాత్ర","Staff":"సిబ్బంది","Admin":"అడ్మిన్","Add user":"యూజర్‌ను చేర్చండి","Action":"చర్య","Reset password":"పాస్‌వర్డ్ రీసెట్","Delete":"తొలగించు","User added.":"యూజర్ చేర్చబడ్డారు.",
+"This User ID already exists.":"ఈ యూజర్ ఐడి ఇప్పటికే ఉంది.","Enter User ID and a password of at least 4 characters.":"యూజర్ ఐడి మరియు కనీసం 4 అక్షరాల పాస్‌వర్డ్ ఇవ్వండి.",
+"New Password :":"కొత్త పాస్‌వర్డ్ :","Change":"మార్చండి","Password changed.":"పాస్‌వర్డ్ మార్చబడింది.","Password must have at least 4 characters.":"పాస్‌వర్డ్ కనీసం 4 అక్షరాలు ఉండాలి.",
+"Download backup":"బ్యాకప్ డౌన్‌లోడ్","Restore from backup file":"బ్యాకప్ ఫైల్ నుండి పునరుద్ధరించండి","Backup downloaded.":"బ్యాకప్ డౌన్‌లోడ్ అయింది.","This file is not a valid backup.":"ఈ ఫైల్ సరైన బ్యాకప్ కాదు.",
+"Download all records as a file. Keep it safe. You can restore it on this or another device.":"అన్ని రికార్డులను ఫైల్‌గా డౌన్‌లోడ్ చేయండి. సురక్షితంగా ఉంచండి. ఈ లేదా వేరే పరికరంలో పునరుద్ధరించవచ్చు.",
+"No backup yet.":"ఇంకా బ్యాకప్ లేదు.","Backup saved on this device and downloaded.":"బ్యాకప్ ఈ పరికరంలో సేవ్ అయి డౌన్‌లోడ్ అయింది.","Backup file updated and downloaded.":"బ్యాకప్ ఫైల్ అప్‌డేట్ అయి డౌన్‌లోడ్ అయింది.","Online":"ఆన్‌లైన్","Offline - everything still works":"ఆఫ్‌లైన్ - అంతా పనిచేస్తుంది"};
+var RX=[[/^Last backup: (.+)$/,"చివరి బ్యాకప్: $1"],[/^Bag (\d+)$/,"బ్యాగ్ $1"],[/^Update Receipt (\d+)$/,"రసీదు $1 అప్‌డేట్ చేయండి"],[/^Report from (.+) to (.+)$/,"రిపోర్ట్: $1 నుండి $2 వరకు"],
+[/^Search Result between (.+) to (.+)$/,"శోధన ఫలితం: $1 నుండి $2 వరకు"],[/^Receipt No\. : (\d+)$/,"రసీదు నంబర్ : $1"],[/^Total Amount : (.*)$/,"మొత్తం : $1"],
+[/^Only (\d+) unit/,"కేవలం $1 యూనిట్"],[/^Please enter Bag No\. for bag (\d+)\.$/,"దయచేసి బ్యాగ్ $1 కు బ్యాగ్ నంబర్ ఇవ్వండి."],[/^Backup restored \((\d+) receipts\)\.$/,"బ్యాకప్ పునరుద్ధరించబడింది ($1 రసీదులు)."]];
+var orig=new WeakMap();
+function tr(v){var t=v.trim();if(!t)return null;if(DICT[t])return v.replace(t,DICT[t]);
+  for(var i=0;i<RX.length;i++){if(RX[i][0].test(t))return v.replace(t,t.replace(RX[i][0],RX[i][1]))}return null}
+function walk(n){
+  if(n.nodeType===3){
+    if(LANG==="te"){if(!orig.has(n)){var r=tr(n.nodeValue);if(r!==null){orig.set(n,n.nodeValue);n.nodeValue=r}}}
+    else if(orig.has(n)){n.nodeValue=orig.get(n);orig.delete(n)}
+  }else if(n.nodeType===1&&n.tagName!=="SCRIPT"&&n.tagName!=="STYLE"&&!n.classList.contains("lang")){for(var c=n.firstChild;c;c=c.nextSibling)walk(c)}}
+new MutationObserver(function(ms){if(LANG!=="te")return;ms.forEach(function(m){Array.prototype.forEach.call(m.addedNodes,walk)})}).observe(document.body,{childList:true,subtree:true});
+function setLang(l){LANG=l;save("bc_lang",l);document.documentElement.lang=l==="te"?"te":"en";
+  $("lgEn").classList.toggle("on",l==="en");$("lgTe").classList.toggle("on",l==="te");walk(document.body)}
+$("lgEn").onclick=function(){setLang("en")};$("lgTe").onclick=function(){setLang("te")};
+setLang(LANG);
+</script>
+</body>
+</html>
