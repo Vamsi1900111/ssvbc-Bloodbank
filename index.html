@@ -168,8 +168,9 @@ function total(r){return r.bags.reduce(function(s,b){return s+Number(b.amt||0)},
 
 var pages={issue:"Issue Bags",rep1:"View Reports",rep2:"Bags Reports",rep3:"Hospital Wise",rep4:"Bag ID Reports",users:"Manage Users",pwdPage:"Change Password",backup:"Backup",out:"Logout"};
 var ids=["login","issue","receipt","rep1","rep2","pwdPage","backup","usersPage"],me=null,editing=null,mode="bags";
-function buildNav(){var n=$("nav");n.innerHTML="";Object.keys(pages).forEach(function(k){if(me&&me.role!=="Admin"&&k!=="issue"&&k!=="pwdPage"&&k!=="out")return;var b=document.createElement("button");b.textContent=pages[k];b.dataset.k=k;b.onclick=function(){go(k)};n.appendChild(b)})}
+function buildNav(){var n=$("nav");n.innerHTML="";Object.keys(pages).forEach(function(k){if(me&&me.role!=="Admin"&&(k==="users"||k==="backup"))return;var b=document.createElement("button");b.textContent=pages[k];b.dataset.k=k;b.onclick=function(){go(k)};n.appendChild(b)})}
 function go(k){
+  if(me&&me.role!=="Admin"&&(k==="users"||k==="backup"))k="issue";
   if(k==="out"){try{sessionStorage.removeItem("bc_in");sessionStorage.removeItem("bc_user")}catch(e){}me=null;$("nav").classList.add("hide");return showSec("login")}
   var sec=k;if(k==="users"){sec="usersPage";cancelU();renderUsers()}
   if(k==="rep3"||k==="rep4"||k==="rep2"){sec="rep2";mode=k==="rep4"?"ids":"bags";
